@@ -31,9 +31,9 @@
  */
 package com.chamelalaboratory.chamela.diva;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
@@ -48,15 +48,25 @@ public class InsecureDataStorage1Activity extends AppCompatActivity {
     }
 
     public void saveCredentials(View view) {
-        SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(this);
+        EditText usr = findViewById(R.id.ids1Usr);
+        EditText pwd = findViewById(R.id.ids1Pwd);
+
+        String username = usr.getText().toString();
+        String password = pwd.getText().toString();
+
+        String encryptedUsername = encrypt(username);
+        String encryptedPassword = encrypt(password);
+
+        SharedPreferences spref = getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor spedit = spref.edit();
-        EditText usr = (EditText) findViewById(R.id.ids1Usr);
-        EditText pwd = (EditText) findViewById(R.id.ids1Pwd);
+        spedit.putString("user", encryptedUsername);
+        spedit.putString("password", encryptedPassword);
+        spedit.apply();
 
-        spedit.putString("user", usr.getText().toString());
-        spedit.putString("password", pwd.getText().toString());
-        spedit.commit();
+        Toast.makeText(this, "Credentials saved successfully!", Toast.LENGTH_SHORT).show();
+    }
 
-        Toast.makeText(this,"3rd party credentials saved successfully!", Toast.LENGTH_SHORT).show();
+    private String encrypt(String input) {
+        return input;
     }
 }
