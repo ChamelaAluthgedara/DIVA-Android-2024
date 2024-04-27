@@ -42,35 +42,39 @@ import android.widget.Toast;
 
 public class APICreds2Activity extends AppCompatActivity {
 
+    private static final String CORRECT_PIN = "1234"; // Example correct PIN
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apicreds2);
-        TextView apicview = (TextView) findViewById(R.id.apic2TextView);
-        EditText pintext  = (EditText) findViewById(R.id.aci2pinText);
-        Button  vbutton   = (Button) findViewById(R.id.aci2button);
+        TextView apicview = findViewById(R.id.apic2TextView);
+        EditText pintext  = findViewById(R.id.aci2pinText);
+        Button  vbutton   = findViewById(R.id.aci2button);
         Intent i = getIntent();
         boolean bcheck = i.getBooleanExtra(getString(R.string.chk_pin), true);
 
-        if (bcheck == false) {
-            // Connect to vendor cloud and send User PIN
-            // Get API credentials and other confidential details of the user
-            String apidetails = "TVEETER API Key: secrettveeterapikey\nAPI User name: diva2\nAPI Password: p@ssword2";
-            // Display the details on the app
-            apicview.setText(apidetails);
-        }
-        else {
+        if (!bcheck) {
+            // Display a message prompting user to register and obtain a PIN
             apicview.setText("Register yourself at http://payatu.com to get your PIN and then login with that PIN!");
             pintext.setVisibility(View.VISIBLE);
             vbutton.setVisibility(View.VISIBLE);
+        } else {
+            // This block should only execute if the PIN is correct
+            String apidetails = ""; // Initialize to empty string
+            if (validatePIN(pintext.getText().toString())) {
+                // Connect to vendor cloud and fetch API credentials
+                apidetails = "TVEETER API Key: secrettveeterapikey\nAPI User name: diva2\nAPI Password: p@ssword2";
+            } else {
+                Toast.makeText(this, "Invalid PIN. Please try again", Toast.LENGTH_SHORT).show();
+            }
+            // Display the API details
+            apicview.setText(apidetails);
         }
     }
 
-    public void viewCreds(View view) {
-        //Save user PIN
-        // Connect to vendor cloud and send User PIN
-        // Get API credentials and other confidential details of the user
-        // If PIN is wrong ask user to enter correct pin
-        Toast.makeText(this, "Invalid PIN. Please try again", Toast.LENGTH_SHORT).show();
+    // Function to validate PIN (replace with secure validation logic)
+    private boolean validatePIN(String pin) {
+        return pin.equals(CORRECT_PIN);
     }
 }
