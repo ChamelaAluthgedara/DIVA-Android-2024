@@ -32,7 +32,9 @@
 package com.chamelalaboratory.chamela.diva;
 
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -50,14 +52,27 @@ public class InputValidation3Activity extends AppCompatActivity {
     }
 
     public void push(View view) {
-        EditText cTxt = (EditText) findViewById(R.id.ivi3CodeText);
+        EditText cTxt = findViewById(R.id.ivi3CodeText);
+        String inputText = cTxt.getText().toString().trim();
 
-        if (djni.initiateLaunchSequence(cTxt.getText().toString()) != 0) {
-            Toast.makeText(this, "Launching in T - 10 ...", Toast.LENGTH_SHORT).show();
+        if (inputText.isEmpty()) {
+            Toast.makeText(this, "Please enter a code!", Toast.LENGTH_SHORT).show();
+            return;
         }
-        else {
+
+        if (!isValidInput(inputText)) {
+            Toast.makeText(this, "Invalid characters detected!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (djni.initiateLaunchSequence(inputText) != 0) {
+            Toast.makeText(this, "Launching in T - 10 ...", Toast.LENGTH_SHORT).show();
+        } else {
             Toast.makeText(this, "Access denied!", Toast.LENGTH_SHORT).show();
         }
+    }
 
+    private boolean isValidInput(String input) {
+        return input.matches("[a-zA-Z0-9!@#$%^&*()-_=+]+");
     }
 }
