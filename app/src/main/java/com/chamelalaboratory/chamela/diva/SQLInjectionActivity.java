@@ -64,10 +64,11 @@ public class SQLInjectionActivity extends AppCompatActivity {
     }
 
     public void search(View view) {
-        EditText srchtxt = (EditText) findViewById(R.id.ivi1search);
+        EditText srchtxt = findViewById(R.id.ivi1search);
         Cursor cr = null;
         try {
-            cr = mDB.rawQuery("SELECT * FROM sqliuser WHERE user = '" + srchtxt.getText().toString() + "'", null);
+            // Use parameterized query to prevent SQL injection
+            cr = mDB.rawQuery("SELECT * FROM sqliuser WHERE user = ?", new String[]{srchtxt.getText().toString()});
             StringBuilder strb = new StringBuilder("");
             if ((cr != null) && (cr.getCount() > 0)) {
                 cr.moveToFirst();
@@ -83,6 +84,11 @@ public class SQLInjectionActivity extends AppCompatActivity {
         }
         catch(Exception e) {
             Log.d("Diva-sqli", "Error occurred while searching in database: " + e.getMessage());
+        } finally {
+            if (cr != null) {
+                cr.close(); // Close the cursor to release resources
+            }
         }
     }
 }
+
