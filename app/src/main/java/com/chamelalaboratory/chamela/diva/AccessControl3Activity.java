@@ -43,6 +43,7 @@ import android.widget.Toast;
 
 public class AccessControl3Activity extends AppCompatActivity {
 
+    private static final int MIN_PIN_LENGTH = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,30 +53,30 @@ public class AccessControl3Activity extends AppCompatActivity {
         SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(this);
         String pin = spref.getString(getString(R.string.pkey), "");
 
+        Button vbutton = findViewById(R.id.aci3viewbutton);
         if (!pin.isEmpty()) {
-            Button vbutton = (Button) findViewById(R.id.aci3viewbutton);
             vbutton.setVisibility(View.VISIBLE);
+        } else {
+            vbutton.setVisibility(View.GONE);
         }
     }
 
     public void addPin(View view) {
         SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor spedit = spref.edit();
-        EditText pinTxt = (EditText) findViewById(R.id.aci3Pin);
-        String pin = pinTxt.getText().toString();
+        EditText pinTxt = findViewById(R.id.aci3Pin);
+        String pin = pinTxt.getText().toString().trim();
 
-        if (pin == null || pin.isEmpty()) {
-            Toast.makeText(this, "Please Enter a valid pin!", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            Button vbutton = (Button) findViewById(R.id.aci3viewbutton);
+        if (pin.length() < MIN_PIN_LENGTH) {
+            Toast.makeText(this, "PIN should be at least " + MIN_PIN_LENGTH + " characters long!", Toast.LENGTH_SHORT).show();
+        } else {
             spedit.putString(getString(R.string.pkey), pin);
-            spedit.commit();
-            if (vbutton.getVisibility() != View.VISIBLE) {
-                vbutton.setVisibility(View.VISIBLE);
-            }
+            spedit.apply();
 
-            Toast.makeText(this, "PIN Created successfully. Private notes are now protected with PIN", Toast.LENGTH_SHORT).show();
+            Button vbutton = findViewById(R.id.aci3viewbutton);
+            vbutton.setVisibility(View.VISIBLE);
+
+            Toast.makeText(this, "PIN created successfully. Private notes are now protected with PIN.", Toast.LENGTH_SHORT).show();
         }
     }
 
