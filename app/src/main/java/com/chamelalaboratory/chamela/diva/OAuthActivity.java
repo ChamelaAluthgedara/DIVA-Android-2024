@@ -1,59 +1,58 @@
 package com.chamelalaboratory.chamela.diva;
-
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 public class OAuthActivity extends AppCompatActivity {
 
-    private static final String CLIENT_ID = "H43VFY5RFB3UGTRUTUGV4T3TI3GTO43BG";
-    private static final String REDIRECT_URI = "chamelalaboratory.com";
-    private static final String AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/auth";
-    private static final String TOKEN_URL = "https://accounts.google.com/o/oauth2/token";
-    private static final String SCOPE = "chamela@gmail.com";
+    private static final int RC_SIGN_IN = 123;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oauth);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
 
-        // Initiate OAuth flow
-        initiateOAuth();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, connectionResult -> {
+                    Log.d("GoogleSignIn", "Connection failed");
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+        signIn();
     }
 
-    private void initiateOAuth() {
-        Uri.Builder builder = Uri.parse(AUTHORIZATION_URL).buildUpon();
-        builder.appendQueryParameter("client_id", CLIENT_ID);
-        builder.appendQueryParameter("redirect_uri", REDIRECT_URI);
-        builder.appendQueryParameter("scope", SCOPE);
-        builder.appendQueryParameter("response_type", "code");
-
-        Intent intent = new Intent(Intent.ACTION_VIEW, builder.build());
-        startActivity(intent);
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        Uri uri = getIntent().getData();
-        if (uri != null && uri.toString().startsWith(REDIRECT_URI)) {
-            handleOAuthResponse(uri);
-        }
-    }
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-    private void handleOAuthResponse(Uri uri) {
-        String code = uri.getQueryParameter("code");
-        if (code != null) {
-            Toast.makeText(this, "Authorization code: " + code, Toast.LENGTH_SHORT).show();
-        } else {
-            String error = uri.getQueryParameter("error");
-            if (error != null) {
-                Log.e("OAuth", "Authorization error: " + error);
-                Toast.makeText(this, "Authorization error: " + error, Toast.LENGTH_SHORT).show();
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInAccount account = Auth.GoogleSignInApi.getSignInResultFromIntent(data).getSignInAccount();
+            if (account != null) {
+                String displayName = account.getDisplayName();
+                String email = account.getEmail();
+                Toast.makeText(this, "Welcome, " + displayName, Toast.LENGTH_SHORT).show();
+            } else {
+                Log.e("GoogleSignIn", "Sign in failed");
+                Toast.makeText(this, "Sign in failed", Toast.LENGTH_SHORT).show();
             }
         }
     }
